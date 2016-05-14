@@ -1,10 +1,13 @@
 // Import required libraries
 #include "ESP8266WiFi.h"
 #include "DHT.h"
+#include <QueueArray.h>
 
 // WiFi parameters
 const char* ssid = "birds";
 const char* password = "ceardida";
+
+//String airQualityHistory = "";
 
 //Sensor Setup
 #define airquality_sensor_pin 0
@@ -22,6 +25,8 @@ DHT dht(DHTPIN, DHTTYPE, 15);
 // Host
 const char* host = "dweet.io";
 
+
+  
 void setup() {
   
   // Start Serial
@@ -46,6 +51,7 @@ void setup() {
   Serial.println("WiFi connected");  
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
+ 
 }
 
 void loop() {
@@ -61,18 +67,18 @@ void loop() {
     return;
   }
   
-  // Reading temperature and humidity
-  int h = dht.readHumidity();
-  // Read temperature as Celsius
-  int t = dht.readTemperature();
-  
   // This will send the request to the server
   int airquality_value = analogRead(airquality_sensor_pin);
-    int gas_value = analogRead(gas_sensor_pin);
-    float volume = (float)gas_value/1024*5.0*1000;
-    delay(50);
-
-    String message = String("GET /dweet/for/arisgassensor?airquality_value=") + String(airquality_value) + "&gas_value=" + String(gas_value) + "&volume=" + String(volume) + " HTTP/1.1\r\n" +
+  /*if (airQualityHistory.length()==0)
+    airQualityHistory = "[" + String(airquality_value);
+  else
+    airQualityHistory = airQualityHistory + "," + String(airquality_value);  */
+  
+  int gas_value = analogRead(gas_sensor_pin);
+  float volume = (float)gas_value/1024*5.0*1000;
+ 
+  delay(50);
+  String message = String("GET /dweet/for/arisgassensor?airquality_value=") + String(airquality_value) + "&volume=" + String(volume) + " HTTP/1.1\r\n" +
                "Host: " + host + "\r\n" + 
                "Connection: close\r\n\r\n";
   client.print(message);
@@ -87,6 +93,8 @@ void loop() {
   
   Serial.println();
   Serial.println("closing connection");
+
+
   
   // Repeat every 10 seconds
   delay(1000);
